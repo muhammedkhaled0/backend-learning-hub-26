@@ -12,17 +12,17 @@
 // PART 0 — THE CRIME SCENE (plain JS behavior, explained here in comments)
 // =========================================================================
 //
-// 1) The printed total is "5008-50" is WRONG in a sneaky way, not a crash:
-//    "250" * 2 = 500 (multiplication coerces the string to a number automatically),
-//    but if the code had used + anywhere (e.g. price + price), JS would have
-//    glued strings together instead of adding numbers. The real danger in the
-//    original snippet is that `discount = "50"` in `total - discount` DOES get
-//    coerced to a number because `-` also forces numeric coercion — so this
-//    specific bug is quiet. The actual production bug this represents is systemic:
-//    ANY arithmetic operator in JS will silently coerce mismatched types instead
-//    of erroring, so the one time someone uses `+` instead of `-` or concatenates
-//    a template string into a "number" field, the bug becomes silent and wrong,
-//    not loud and obvious.
+// 1) The printed total is NaN. "250 EGB" * 2 tries to coerce "250 EGB" to a
+//    number, fails (it's not a clean numeric string), and produces NaN.
+//    From there, NaN propagates through every further calculation — NaN + 100
+//    is NaN, and NaN - "50" is still NaN. Critically, JavaScript does NOT
+//    throw an error for any of this. It just quietly returns NaN and moves
+//    on, so `console.log` prints NaN and the program keeps running as if
+//    nothing went wrong. In a real backend this could mean an invoice sent
+//    to a customer literally saying they owe "NaN EGP" — or worse, a NaN
+//    silently flowing into a database column typed as a float and getting
+//    stored as null/0 depending on the driver, with no error anywhere in
+//    the logs pointing at the actual cause.
 // 2) `order.shippingAddress.city` crashes with "Cannot read properties of
 //    undefined (reading 'city')" because `shippingAddress` was never set on the
 //    object at all, and JS happily lets you try to access `.city` on `undefined`
@@ -45,17 +45,17 @@ function calculateOrderTotal(items: { price: number; qty: number }[], discount: 
 // const brokenOrder = {
 //   customer: "Layla",
 //   items: [
-//     { price: "250", qty: 2 },
+//     { price: "250 EGB", qty: 2 },
 //     { price: 100, qty: 1 },
 //   ],
 // };
 // calculateOrderTotal(brokenOrder.items, "50");
 //
 // Compiler error (paraphrased for a non-technical manager):
-// "You're trying to hand me a price written as text ('250') where I expect an
-// actual number, and a discount written as text ('50') where I also expect a
-// number. I'm stopping you right now, at write-time, instead of letting this
-// reach a customer's invoice."
+// "You're trying to hand me a price written as text ('250 EGB') where I
+// expect an actual number, and a discount written as text ('50') where I
+// also expect a number. I'm stopping you right now, at write-time, instead
+// of letting this silently turn into NaN on a customer's invoice."
 
 // =========================================================================
 // PART 2 — WHAT IS TYPESCRIPT (modeling real states)

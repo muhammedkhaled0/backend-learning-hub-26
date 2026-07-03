@@ -24,7 +24,7 @@ function calculateOrderTotal(items, discount) {
 const order = {
   customer: "Layla",
   items: [
-    { price: "250", qty: 2 },    
+    { price: "250 EGP", qty: 2 },    
     { price: 100, qty: 1 },
   ],
 };
@@ -36,7 +36,7 @@ console.log(order.shippingAddress.city);
 Run it. Look at what actually happens.
 
 **Your task:** In a comment block, answer:
-1. What is the *actual* printed value of the total, and why is it wrong instead of just throwing an error?
+1. What is the actual printed value of the total, and why does JavaScript produce that instead of an error? (Hint: * and - try to coerce strings to numbers — what happens when the string isn't a clean number at all, like "250 EGB"?)
 2. Why did `order.shippingAddress.city` crash the whole program instead of failing gracefully?
 3. If this were a real backend, what would customers experience from each bug?
 
