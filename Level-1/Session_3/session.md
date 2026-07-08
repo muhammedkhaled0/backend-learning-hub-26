@@ -711,7 +711,9 @@ new Promise((resolve, reject) => {
 
 ## Getting the Result
 
-A Promise only represents future work.
+The Promise isn't the data.
+It represents data that will be available later.
+It's just the object tracking the operation.
 
 To receive its result, we use **`.then()`**.
 
@@ -941,7 +943,35 @@ async function getUserAsync(id: number) {
   }
 }
 ```
+---
+Example:
+```typescript
+function delay(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
 
+async function demo() {
+  console.log("1. Inside async function");
+
+  await delay(3000);
+
+  console.log("4. Async function resumed after 3 seconds");
+}
+
+console.log("Start");
+
+demo();
+
+console.log("2. This runs immediately");
+
+setTimeout(() => {
+  console.log("3. Another callback runs while demo() is waiting");
+}, 1000);
+
+console.log("End");
+```
 ---
 
 ### Comparing All Patterns: The Evolution
